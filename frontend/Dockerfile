@@ -1,5 +1,5 @@
 # ------------------- Stage 1: Build Stage ------------------------------
-FROM node:21 AS frontend-builder
+FROM node:18 AS frontend-builder
 
 # Set the working directory to /app
 WORKDIR /app
@@ -7,20 +7,20 @@ WORKDIR /app
 # Copy the package.json and package-lock.json for dependency installation
 COPY package*.json ./
 
-# Clear npm cache to avoid issues and Install dependencies
-RUN npm cache clean --force && npm install --verbose
+# Install dependencies
+RUN npm install
 
 # Copy the rest of the application code
 COPY . .
 
 # ------------------- Stage 2: Final Stage ------------------------------
-FROM node:21-slim
+FROM node:18-slim
 
 # Set the working directory to /app
 WORKDIR /app
 
 # Copy built assets and dependencies from frontend-builder stage
-COPY --from=frontend-builder /app .
+COPY --from=frontend-builder /app ./
 
 # Copy the .env.sample file to .env.local
 COPY .env.docker .env.local
@@ -30,4 +30,3 @@ EXPOSE 5173
 
 # Define the default command to run the application in development mode
 CMD ["npm", "run", "dev", "--", "--host"]
-
